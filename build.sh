@@ -16,7 +16,7 @@ START=$(date +"%s")
 DEVICE=WhyRed
 DEFCONFIG=whyred-newcam_defconfig
 CAMERA=NewCam
-OVERCLOCK=NonOC
+OVERCLOCK=OC
 #
 # use ccache
 export USE_CCACHE=1
@@ -31,7 +31,7 @@ export PATH="/usr/lib/ccache:$PATH"
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export LOCALVERSION="-X3"
+export LOCALVERSION="-Z1"
 export KBUILD_COMPILER_STRING=$(gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 export KBUILD_BUILD_HOST="vishal"
 export KBUILD_BUILD_USER="akira"
