@@ -14,7 +14,9 @@ TANGGAL=$(date +"%F-%S")
 DATE=$(date +"%m-%d-%y")
 START=$(date +"%s")
 DEVICE=WhyRed
-DEFCONFIG=whyred_defconfig
+DEFCONFIG=whyred-newcam_defconfig
+CAMERA=NewCam
+OVERCLOCK=NonOC
 #
 # use ccache
 export USE_CCACHE=1
@@ -61,7 +63,7 @@ function zipper() {
     echo -e "$CYAN- Time To ZIP Up!$WHITE"
     cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $HOME/AnyKernel
     cd $HOME/AnyKernel || exit 1
-    zip -r9 neXus-X3_${DEVICE}-KERNEL-${TANGGAL}.zip *
+    zip -r9 neXus-X3_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
     cd $HOME && cd $KERNEL_DIR
     END=$(date +"%s")
     DIFF=$(($END - $START))
