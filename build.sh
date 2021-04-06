@@ -17,6 +17,7 @@ DEVICE=WhyRed
 DEFCONFIG=whyred-newcam_defconfig
 CAMERA=NewCam
 OVERCLOCK=NonOC
+VERSION=X4
 #
 # use ccache
 export USE_CCACHE=1
@@ -41,17 +42,13 @@ export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 function checker() {
     if [ -f $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb ]
        then
-        echo -e ""
         echo -e "$CYAN- Cloning AnyKernel3$WHITE"
         cd && git clone https://github.com/akira-vishal/AnyKernel3.git AnyKernel
-        echo -e ""
         echo -e "$GREEN- Done!$WHITE"
         cd $HOME && cd $KERNEL_DIR
         zipper
        else
-        echo -e ""
         echo -e "$RED- Build Failed$WHITE"
-        
     fi
 }
 #
@@ -59,24 +56,19 @@ function zipper() {
     rm -f $HOME/AnyKernel/Image.gz*
     rm -f $HOME/AnyKernel/zImage*
     rm -f $HOME/AnyKernel/dtb*
-    echo -e ""
     echo -e "$CYAN- Time To ZIP Up!$WHITE"
     cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $HOME/AnyKernel
     cd $HOME/AnyKernel || exit 1
-    zip -r9 neXus-${LOCALVERSION}_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
+    zip -r9 neXus-${VERSION}_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
     cd $HOME && cd $KERNEL_DIR
     END=$(date +"%s")
     DIFF=$(($END - $START))
-    echo -e ""
 	echo -e "$GREEN- Build Completed Succesfully$WHITE"
-	echo -e ""
 	echo -e "$GREEN- Build took : $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s).$WHITE"
-	echo -e ""
 }
 #
 function compiler() {
     rm -rf $KERNEL_DIR/out
-    echo -e ""
 	echo -e "$CYAN- Building Kernel$WHITE"
     make clean && make mrproper O=out
     make O=out	${DEFCONFIG}
