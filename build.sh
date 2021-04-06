@@ -23,16 +23,16 @@ export USE_CCACHE=1
 #
 #ccache variables
 export CCACHE_DIR="$HOME/.ccache"
-export CC="ccache gcc"
-export CXX="ccache g++"
+export CC="ccache clang"
+export CXX="ccache clang++"
 export PATH="/usr/lib/ccache:$PATH"
 #
 #Export variables
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export LOCALVERSION="-X3"
-export KBUILD_COMPILER_STRING=$(gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+export LOCALVERSION="-X4"
+export KBUILD_COMPILER_STRING=$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 export KBUILD_BUILD_HOST="vishal"
 export KBUILD_BUILD_USER="akira"
 export CROSS_COMPILE=aarch64-linux-gnu-
@@ -63,7 +63,7 @@ function zipper() {
     echo -e "$CYAN- Time To ZIP Up!$WHITE"
     cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $HOME/AnyKernel
     cd $HOME/AnyKernel || exit 1
-    zip -r9 neXus-X3_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
+    zip -r9 neXus-${LOCALVERSION}_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
     cd $HOME && cd $KERNEL_DIR
     END=$(date +"%s")
     DIFF=$(($END - $START))
