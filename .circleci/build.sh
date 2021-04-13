@@ -1,64 +1,81 @@
 #!/usr/bin/env bash
 echo "Cloning dependencies"
-git clone --depth=1 https://github.com/kdrag0n/proton-clang Clang
+git clone --depth=1 https://github.com/kdrag0n/proton-clang clang
 git clone --depth=1 https://github.com/akira-vishal/AnyKernel3.git AnyKernel
 echo "Done"
-KERNEL_DIR=$(pwd)
-PATH="${PWD}/clang/bin:$PATH"
+DEVICE=WhyRed
+DEFCONFIG=whyred_defconfig
+CAMERA=OldCam
+OVERCLOCK=OC
+VERSION=Z2
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 TANGGAL=$(date +"%F-%S")
 START=$(date +"%s")
-DEVICE=WhyRed
-DEFCONFIG=whyred-newcam_defconfig
-CAMERA=NewCam
-OVERCLOCK=NonOC
-VERSION=X4
-#Export variables
-export LOCALVERSION="-X4"
-export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/Clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
+KERNEL_DIR=$(pwd)
+PATH="${PWD}/clang/bin:$PATH"
+export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
 export ARCH=arm64
-export SUBARCH=arm64
-export HEADER_ARCH=arm64
+export LOCALVERSION="-Z2"
 export KBUILD_BUILD_HOST=circleci
 export KBUILD_BUILD_USER="vishal"
-# Check plox
-function checker() {
-    if ! [ -a "$IMAGE" ]; then
-        zipper
-        exit 1
-    fi
+# sticker plox
+function sticker() {
+    curl -s -X POST "https://api.telegram.org/bot$token/sendSticker" \
+        -d sticker="CAACAgEAAxkBAAEnKnJfZOFzBnwC3cPwiirjZdgTMBMLRAACugEAAkVfBy-aN927wS5blhsE" \
+        -d chat_id=$chat_id
 }
-# Zip plox
-function zipper() {
-    rm -f AnyKernel/Image.gz*
-    rm -f AnyKernel/zImage*
-    rm -f AnyKernel/dtb*
-    cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
-    cd AnyKernel || exit 1
-    zip -r9 neXus-${VERSION}_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
-    cd ..
+# Send info plox channel
+function sendinfo() {
+    curl -s -X POST "https://api.telegram.org/bot$token/sendMessage" \
+        -d chat_id="$chat_id" \
+        -d "disable_web_page_preview=true" \
+        -d "parse_mode=html" \
+        -d text="<b>• neXus Kernel •</b>%0ABuild started on <code>Circle CI</code>%0AFor device <b>Xiaomi Redmi Note5/5Pro</b> (whyred)%0Abranch <code>$(git rev-parse --abbrev-ref HEAD)</code>(master)%0AUnder commit <code>$(git log --pretty=format:'"%h : %s"' -1)</code>%0AUsing compiler: <code>${KBUILD_COMPILER_STRING}</code>%0AStarted on <code>$(date)</code>%0A<b>Build Status:</b>#Stable"
 }
-# Push kernel to group
+# Push kernel to channel
 function push() {
     cd AnyKernel
     ZIP=$(echo *.zip)
-    curl -F document=@$ZIP "https://api.telegram.org/bot1373659015:AAHYlK0kyimFra5qcAL6mV2jsCCNAT26nys/sendDocument" \
-        -F chat_id="1322257045" \
+    curl -F document=@$ZIP "https://api.telegram.org/bot$token/sendDocument" \
+        -F chat_id="$chat_id" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>Xiaomi Redmi Note 5/5pro (whyred)</b>"
+        -F caption="Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>Xiaomi Redmi Note 5/5pro (whyred)</b> | <b>$(${GCC}gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')</b>"
+}
+# Fin Error
+function finerr() {
+    curl -s -X POST "https://api.telegram.org/bot$token/sendMessage" \
+        -d chat_id="$chat_id" \
+        -d "disable_web_page_preview=true" \
+        -d "parse_mode=markdown" \
+        -d text="Build throw an error(s)"
+    exit 1
 }
 # Compile plox
-function compiler() {
+function compile() {
     make O=out ARCH=arm64 ${DEFCONFIG}
     make -j$(nproc --all) O=out \
                           ARCH=arm64 \
 			  CC=clang \
 			  CROSS_COMPILE=aarch64-linux-gnu- \
 			  CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+
+    if ! [ -a "$IMAGE" ]; then
+        finerr
+        exit 1
+    fi
+    cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 }
-compiler
-checker
+# Zipping
+function zipping() {
+    cd AnyKernel || exit 1
+    zip -r9 neXus-${VERSION}_${DEVICE}-${CAMERA}-${OVERCLOCK}-KERNEL-${TANGGAL}.zip *
+    cd ..
+}
+sticker
+sendinfo
+compile
+zipping
 END=$(date +"%s")
 DIFF=$(($END - $START))
 push
