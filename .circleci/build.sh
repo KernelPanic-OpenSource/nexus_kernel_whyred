@@ -4,10 +4,10 @@ git clone --depth=1 https://github.com/kdrag0n/proton-clang clang
 git clone --depth=1 https://github.com/akira-vishal/AnyKernel3.git AnyKernel
 echo "Done"
 DEVICE=WhyRed
-DEFCONFIG=whyred_defconfig
-CAMERA=OldCam
-OVERCLOCK=OC
-VERSION=Z2
+DEFCONFIG=whyred-newcam_defconfig
+CAMERA=NewCam
+OVERCLOCK=NonOC
+VERSION=X4
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 TANGGAL=$(date +"%F-%S")
 START=$(date +"%s")
@@ -15,13 +15,13 @@ KERNEL_DIR=$(pwd)
 PATH="${PWD}/clang/bin:$PATH"
 export KBUILD_COMPILER_STRING="$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
 export ARCH=arm64
-export LOCALVERSION="-Z2"
+export LOCALVERSION="-${VERSION}"
 export KBUILD_BUILD_HOST=circleci
 export KBUILD_BUILD_USER="vishal"
 # sticker plox
 function sticker() {
     curl -s -X POST "https://api.telegram.org/bot$token/sendSticker" \
-        -d sticker="CAACAgEAAxkBAAEnKnJfZOFzBnwC3cPwiirjZdgTMBMLRAACugEAAkVfBy-aN927wS5blhsE" \
+        -d sticker="CAACAgUAAx0CVxrmOQABAuqhYHYLgi-2cn9jpggMD8VYBIEzQWgAAsQBAALU8vhUZa6bA1OeOtoeBA" \
         -d chat_id=$chat_id
 }
 # Send info plox channel
